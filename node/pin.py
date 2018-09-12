@@ -3,6 +3,7 @@
 import subprocess
 import time
 import random
+import sys
 
 # To escape shell strings
 from shlex import quote
@@ -37,14 +38,16 @@ def getHash(memo):
 
 # look for hash in server
 def hashCheck(ipfsHex):
-    return subprocess.call('/usr/local/bin/ipfs pin ls | grep '
+    return subprocess.call('/usr/local/bin/ipfs pin ls --type recursive | grep '
         + format(quote(ipfsHex)), shell=True)
 
 def checkSubProc(pin, count):
     # if still running Popen.poll() returns None
     # else it ouputs the returncode of the command ran.
     if pin.poll() == None:
-        print(count)
+        sys.stdout.write('.')
+        sys.stdout.flush()
+        #print(count)
         # TODO: change amout for prod.
         time.sleep(1)
         # for looping on itself
@@ -77,6 +80,7 @@ for blocks in acc.get_account_history(-1, 500):
                     currHash = getHash(blocks['memo'])
                     # hashCheck == 1 tells us that the hash was not found
                     if hashCheck(currHash) == 1:
+                        print( "\nPinning " + format(quote(currHash)) )
                         pin = subprocess.Popen('/usr/local/bin/ipfs pin add ' +
                             format(quote(currHash)), shell=True)
                         # give ipfs time to pin hash (in seconds)
@@ -89,3 +93,6 @@ for blocks in acc.get_account_history(-1, 500):
                         else:
                             # kill pin process if still running
                             kill(findPID())
+                    else:
+                        print( "Already pinned " + format(quote(currHash)) )
+                        
