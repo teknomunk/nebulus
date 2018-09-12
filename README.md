@@ -18,6 +18,16 @@ This will help find the pain points during setup and assist in the Docker creati
 - Python
 - Pip
   - BEEM
+- STEEM account
+
+#### Ubuntu 16.04
+- To Be Added
+
+#### Archlinux
+````
+pacman -Sy python-pip gcc go-ipfs
+pip install beem
+````
 
 ### Full setup script is in the works.
 #### Configure IPFS
@@ -54,3 +64,33 @@ You may also need to change your IPFS ports to limit throttleing from your IPFS.
 # IPFS_FD_MAX=4096 is optional
 IPFS_FD_MAX=4096 ipfs daemon &
 ```
+
+#### Setup Nebulus
+Clone the nebulus repository.
+````
+cd $SOME_PATH
+git clone https://github.com/jrswab/nebulus.git
+PATH_TO_NEBULUS=$SOME_PATH/nebulus
+````
+
+Then initialize the software:
+````
+mkdir /etc/steem/
+echo "$PRIVATE_POSTING_KEY" > /etc/steem/private_posting.key
+chown $NEBULUS_USER /etc/steem/private_posting.key
+chmod 700 /etc/steem/private_posting.key
+cd $PATH_TO_NEBULUS/node
+python setup.py
+````
+
+Enter your STEEM username, followed by /etc/steem/private_posting.key
+Then finish initialization:
+
+````
+python init.py
+````
+
+Setup a cron job to run every 30 minutes to add additional pins
+````
+0,30 * * * * /usr/bin/python $PATH_TO_NEBULUS/node/pin.py
+````
